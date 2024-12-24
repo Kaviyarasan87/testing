@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Product Landing Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+    
+    .product-landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 50px;
+      padding: 50px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .product-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .product-image {
+      flex: 1;
+      text-align: center;
+      min-width: 300px;
+    }
+
+    .product-image img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .product-info {
+      flex: 1;
+      padding: 20px;
+      min-width: 300px;
+    }
+
+    .product-info h1 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .product-info p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .product-info ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      color: #555;
+    }
+
+    .product-info ul li {
+      margin-bottom: 10px;
+    }
+
+    /* Alternate layout: Reverse flex direction for even items */
+    .product-item:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+
+    @media (max-width: 768px) {
+      .product-item {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="product-landing">
+    <!-- First Product -->
+    <div class="product-item">
+      <div class="product-image">
+        <img src="./images/product-1.png" alt="Smartwatch">
+      </div>
+      <div class="product-info">
+        <h1>Designed for effective product landing page</h1>
+        <p>
+          Pellentesque eget dolor gravida, tempus purus ac, ultricies mauris.
+          Etiam est nisi, molestie sed egestas bibendum, varius eu diam.
+          Suspendisse est metus, ultrices sit amet dolor in, rhoncus malesuada mi.
+        </p>
+        <ul>
+          <li>Nulla ornare purus non consequat ultricies.</li>
+          <li>Etiam est nisi, molestie sed egestas bibendum.</li>
+          <li>Aliquam vel euismod elit, sed suscipit est.</li>
+          <li>Curabitur egestas justo neque viverra vel.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Second Product -->
+    <div class="product-item">
+      <div class="product-image">
+        <img src="./images/product-2.png" alt="Smartwatch">
+      </div>
+      <div class="product-info">
+        <h1>The best way to show your product to the world</h1>
+        <p>
+          Pellentesque eget dolor gravida, tempus purus ac, ultricies mauris.
+          Etiam est nisi, molestie sed egestas bibendum, varius eu diam.
+          Suspendisse est metus, ultrices sit amet dolor in, rhoncus malesuada mi.
+        </p>
+        <ul>
+          <li>Nulla ornare purus non consequat ultricies.</li>
+          <li>Etiam est nisi, molestie sed egestas bibendum.</li>
+          <li>Aliquam vel euismod elit, sed suscipit est.</li>
+          <li>Curabitur egestas justo neque viverra vel.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Add more products as needed -->
+    <div class="product-item">
+      <div class="product-image">
+        <img src="./images/product-3.png" alt="Smartwatch">
+      </div>
+      <div class="product-info">
+        <h1>Discover innovation like never before</h1>
+        <p>
+          Pellentesque eget dolor gravida, tempus purus ac, ultricies mauris.
+          Etiam est nisi, molestie sed egestas bibendum, varius eu diam.
+          Suspendisse est metus, ultrices sit amet dolor in, rhoncus malesuada mi.
+        </p>
+        <ul>
+          <li>Nulla ornare purus non consequat ultricies.</li>
+          <li>Etiam est nisi, molestie sed egestas bibendum.</li>
+          <li>Aliquam vel euismod elit, sed suscipit est.</li>
+          <li>Curabitur egestas justo neque viverra vel.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="product-item">
+      <div class="product-image">
+        <img src="./images/product-4.png" alt="Smartwatch">
+      </div>
+      <div class="product-info">
+        <h1>Discover innovation like never before</h1>
+        <p>
+          Pellentesque eget dolor gravida, tempus purus ac, ultricies mauris.
+          Etiam est nisi, molestie sed egestas bibendum, varius eu diam.
+          Suspendisse est metus, ultrices sit amet dolor in, rhoncus malesuada mi.
+        </p>
+        <ul>
+          <li>Nulla ornare purus non consequat ultricies.</li>
+          <li>Etiam est nisi, molestie sed egestas bibendum.</li>
+          <li>Aliquam vel euismod elit, sed suscipit est.</li>
+          <li>Curabitur egestas justo neque viverra vel.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="product-item">
+      <div class="product-image">
+        <img src="./images/product-3.png" alt="Smartwatch">
+      </div>
+      <div class="product-info">
+        <h1>Discover innovation like never before</h1>
+        <p>
+          Pellentesque eget dolor gravida, tempus purus ac, ultricies mauris.
+          Etiam est nisi, molestie sed egestas bibendum, varius eu diam.
+          Suspendisse est metus, ultrices sit amet dolor in, rhoncus malesuada mi.
+        </p>
+        <ul>
+          <li>Nulla ornare purus non consequat ultricies.</li>
+          <li>Etiam est nisi, molestie sed egestas bibendum.</li>
+          <li>Aliquam vel euismod elit, sed suscipit est.</li>
+          <li>Curabitur egestas justo neque viverra vel.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
