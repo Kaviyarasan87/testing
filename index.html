@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ff7e5f, #6a11cb);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background: linear-gradient(135deg, #ff5722, #ff9800);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.3);
+    }
+    .file-list {
+      margin-top: 20px;
+      width: 80%;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload File</h2>
+    <input type="file" id="fileInput" multiple />
+    <button id="uploadButton">Upload</button>
+    <div id="uploadStatus"></div>
+  </div>
+  <div class="file-list" id="fileList"></div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+    import { getStorage, ref, uploadBytesResumable, listAll, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBMS_SwjUwlrNGbbdLNQvxfqJKy1whqH-Y",
+      authDomain: "file-4f9fe.firebaseapp.com",
+      projectId: "file-4f9fe",
+      storageBucket: "file-4f9fe.appspot.com",
+      messagingSenderId: "777922174298",
+      appId: "1:777922174298:web:70b8c6a5006512ef4ce763",
+      measurementId: "G-VE72B5E88S"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    document.getElementById('uploadButton').addEventListener('click', async () => {
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) return alert("Select a file first");
+
+      const storageRef = ref(storage, 'uploads/' + file.name);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on('state_changed', 
+        snapshot => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          document.getElementById('uploadStatus').innerText = `Uploading: ${progress.toFixed(2)}%`;
+        }, 
+        error => alert("Upload failed!"),
+        () => {
+          document.getElementById('uploadStatus').innerText = 'Upload complete!';
+          loadFiles();
+        }
+      );
+    });
+
+    async function loadFiles() {
+      const listRef = ref(storage, 'uploads');
+      const res = await listAll(listRef);
+      const fileList = document.getElementById('fileList');
+      fileList.innerHTML = '';
+      res.items.forEach(async itemRef => {
+        const url = await getDownloadURL(itemRef);
+        const isOfflineAvailable = await checkIfFileIsCached(url);
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'file-item';
+        fileDiv.innerHTML = `
+          <span>${itemRef.name}</span>
+          <button onclick="downloadFile('${url}', '${itemRef.name}')" style="background: linear-gradient(135deg, #00b09b, #96c93d);">
+            ${isOfflineAvailable ? 'Available Offline' : 'Download'}
+          </button>
+          <button onclick="deleteFile('${itemRef.fullPath}')" style="background: linear-gradient(135deg, #d32f2f, #ff5252);">Delete</button>
+        `;
+        fileList.appendChild(fileDiv);
+      });
+    }
+
+    window.downloadFile = (url, filename) => {
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Cache the downloaded file for offline access
+      if ('caches' in window) {
+        caches.open('offline-files').then(cache => {
+          cache.add(url);  // Store the file in cache
+        });
+      }
+    };
+
+    async function checkIfFileIsCached(url) {
+      const cache = await caches.open('offline-files');
+      const cachedResponse = await cache.match(url);
+      return cachedResponse != null;
+    }
+
+    window.deleteFile = async (path) => {
+      const fileRef = ref(storage, path);
+      await deleteObject(fileRef);
+      alert("File deleted");
+      loadFiles();
+    }
+
+    loadFiles();
+  </script>
+
+  <!-- Service Worker for offline caching -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+          console.log('Service Worker registration failed:', error);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
