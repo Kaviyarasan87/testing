@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload & Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1f618d   , #2874a6   );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #fileInput {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        #fileNameInput {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        #uploadButton {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        #uploadButton:hover {
+            transform: scale(1.1);
+        }
+
+        #searchBox {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .file-box {
+            background: rgba(255, 255, 255, 0.8);
+            margin: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .file-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-box p {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+
+        .file-box button {
+            background: linear-gradient(45deg, #2980b9, #8e44ad);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            margin-right: 5px;
+        }
+
+        .file-box button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Scrollable File List */
+        #fileList {
+            max-height: 300px;
+            overflow-y: scroll;
+            margin-top: 20px;
+        }
+
+        /* Dark Mode Styling */
+        body.dark-mode {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .container {
+            background: rgba(52, 152, 219, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .file-box {
+            background: rgba(44, 62, 80, 0.8);
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .file-box p {
+            color: #ecf0f1;
+        }
+
+        body.dark-mode button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        }
+
+        #toggleModeButton {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            position: fixed;
+            top: 10px;
+             right: 10px; 
+            z-index: 1000; 
+            
+             
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Your Files :-</h1>
+
+        <!-- File Upload Section -->
+        <input type="file" id="fileInput">
+        <input type="text" id="fileNameInput" placeholder="Enter desired file name (without extension)" required>
+        <button id="uploadButton" onclick="uploadFile()">Upload</button>
+
+        <!-- Search Box -->
+        <input type="text" id="searchBox" placeholder="Search files..." oninput="filterFiles()">
+
+        <!-- File List -->
+        <div id="fileList"></div>
+
+        <!-- Dark Mode Button -->
+        <button id="toggleModeButton" onclick="toggleMode()">Toggle Dark Mode</button>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMS_SwjUwlrNGbbdLNQvxfqJKy1whqH-Y",
+            authDomain: "file-4f9fe.firebaseapp.com",
+            projectId: "file-4f9fe",
+            storageBucket: "file-4f9fe.appspot.com",
+            messagingSenderId: "777922174298",
+            appId: "1:777922174298:web:70b8c6a5006512ef4ce763",
+            measurementId: "G-VE72B5E88S"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        // Function to upload files
+        window.uploadFile = async function () {
+            const fileInput = document.getElementById('fileInput');
+            const fileNameInput = document.getElementById('fileNameInput');
+            const fileNameDisplay = document.getElementById('fileName');
+
+            if (!fileInput.files.length) {
+                alert("Please select a file to upload!");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const customFileName = fileNameInput.value.trim();
+
+            if (customFileName === "") {
+                alert("File name is required!");
+                return;
+            }
+
+            // Ensure the file name doesn't have an extension (Firebase will append the extension automatically)
+            const fileExtension = file.name.split('.').pop();
+            const customFilePath = `uploads/${customFileName}.${fileExtension}`;
+
+            const storageRef = ref(storage, customFilePath);
+
+            try {
+                await uploadBytes(storageRef, file);
+                alert('File uploaded successfully!');
+                displayFiles();
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert('Upload failed!');
+            }
+        };
+
+        // Function to display uploaded files
+        window.displayFiles = async function () {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            const storageRef = ref(storage, 'uploads');
+
+            try {
+                const result = await listAll(storageRef);
+
+                if (result.items.length === 0) {
+                    fileList.innerHTML = "<p>No files found.</p>";
+                }
+
+                result.items.forEach(async (fileRef) => {
+                    const url = await getDownloadURL(fileRef);
+                    const fileDiv = document.createElement('div');
+                    fileDiv.classList.add('file-box');
+                    fileDiv.innerHTML = `
+                        <p>${fileRef.name}</p>
+                        <button onclick="openFile('${url}')">Download</button>
+                        <button onclick="deleteFile('${fileRef.fullPath}')">Delete</button>
+                    `;
+                    fileList.appendChild(fileDiv);
+                });
+
+            } catch (error) {
+                console.error('Error fetching file list:', error);
+                alert('Error fetching file list! Check Firebase rules.');
+            }
+        };
+
+        // Function to search and filter files
+        window.filterFiles = function () {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const fileBoxes = document.querySelectorAll('.file-box');
+
+            fileBoxes.forEach((fileBox) => {
+                const fileName = fileBox.querySelector('p').textContent.toLowerCase();
+                if (fileName.includes(searchTerm)) {
+                    fileBox.style.display = 'block';
+                } else {
+                    fileBox.style.display = 'none';
+                }
+            });
+        };
+
+        // Function to download file
+        window.openFile = function (fileUrl) {
+            window.open(fileUrl, "_blank");
+        };
+
+        // Function to delete file
+        window.deleteFile = async function (filePath) {
+            const fileRef = ref(storage, filePath);
+
+            try {
+                await deleteObject(fileRef);
+                alert('File deleted successfully!');
+                displayFiles();
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                alert('Error deleting file!');
+            }
+        };
+
+        // Function to toggle dark mode
+        window.toggleMode = function () {
+            document.body.classList.toggle('dark-mode');
+        };
+
+        // Load files when the page loads
+        window.onload = displayFiles;
+    </script>
+</body>
+</html>
